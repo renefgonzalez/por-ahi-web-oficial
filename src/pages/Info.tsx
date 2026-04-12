@@ -50,32 +50,33 @@ export default function Info() {
           {/* GUIA DE TALLAS */}
           <section id="tallas" className="space-y-6 scroll-mt-32">
             <h2 className="text-2xl font-black italic tracking-tighter uppercase">Guía de Tallas<span className="text-luxury-cyan">.</span></h2>
-            <div className="overflow-hidden rounded-3xl border border-white/10">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-white/10">
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">Talla</th>
-                    <th className="p-4 text-[10px] uppercase tracking-widest font-bold border-b border-white/5">Medidas (Ancho x Largo)</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm font-light text-white/60">
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-bold text-luxury-cyan">S</td>
-                    <td className="p-4">45 x 68 cm</td>
-                  </tr>
-                  <tr className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-bold text-luxury-cyan">M</td>
-                    <td className="p-4">50 x 70 cm</td>
-                  </tr>
-                  <tr className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 font-bold text-luxury-cyan">L</td>
-                    <td className="p-4">55 x 72 cm</td>
-                  </tr>
-                </tbody>
-              </table>
+            
+            {/* TALLAS MUJER */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-luxury-cyan">Tallas Mujer (Corte Silueta)</h3>
+              <div className="bg-white/5 p-4 rounded-3xl border border-white/10 overflow-hidden flex justify-center">
+                <img 
+                  src="/tallas-mujer.jpg" 
+                  alt="Guía de tallas mujer" 
+                  className="rounded-xl w-full max-w-lg object-contain bg-white/10"
+                />
+              </div>
             </div>
-            <p className="text-[10px] text-white/30 uppercase tracking-widest italic">
-              * Las medidas pueden variar +/- 1cm por el proceso de confección.
+
+            {/* TALLAS UNISEX/HOMBRE */}
+            <div className="space-y-4 mt-8">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white/80">Tallas Hombre / Unisex</h3>
+              <div className="bg-white/5 p-4 rounded-3xl border border-white/10 overflow-hidden flex justify-center">
+                <img 
+                  src="/tallas-hombre.jpg" 
+                  alt="Guía de tallas hombre" 
+                  className="rounded-xl w-full max-w-lg object-contain bg-white/10"
+                />
+              </div>
+            </div>
+            
+            <p className="text-[10px] text-white/30 uppercase tracking-widest italic pt-2">
+              * Las medidas pueden variar +/- 1cm a 2.5cm por el proceso de confección, revisa la tolerancia (TOL+-).
             </p>
           </section>
 
