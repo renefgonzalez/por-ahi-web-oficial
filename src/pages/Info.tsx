@@ -56,20 +56,32 @@ export default function Info() {
               <h3 className="text-sm font-bold uppercase tracking-widest text-luxury-cyan">Tallas Mujer (Corte Silueta)</h3>
               <div className="bg-white/5 p-4 rounded-3xl border border-white/10 overflow-hidden flex justify-center">
                 <img 
-                  src="/tallas-mujer.jpg" 
+                  src="/tallas-playera-mujer.webp" 
                   alt="Guía de tallas mujer" 
                   className="rounded-xl w-full max-w-lg object-contain bg-white/10"
                 />
               </div>
             </div>
 
-            {/* TALLAS UNISEX/HOMBRE */}
+            {/* TALLAS HOMBRE */}
             <div className="space-y-4 mt-8">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-white/80">Tallas Hombre / Unisex</h3>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white/80">Tallas Hombre</h3>
               <div className="bg-white/5 p-4 rounded-3xl border border-white/10 overflow-hidden flex justify-center">
                 <img 
-                  src="/tallas-hombre.jpg" 
+                  src="/tallas-playera-hombe.webp" 
                   alt="Guía de tallas hombre" 
+                  className="rounded-xl w-full max-w-lg object-contain bg-white/10"
+                />
+              </div>
+            </div>
+
+            {/* TALLAS SUDADERA */}
+            <div className="space-y-4 mt-8">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-white/80">Sudadera con gorro (Unisex)</h3>
+              <div className="bg-white/5 p-4 rounded-3xl border border-white/10 overflow-hidden flex justify-center">
+                <img 
+                  src="/tallas-sudadera-con-gorro-unisex.webp" 
+                  alt="Guía de tallas sudadera" 
                   className="rounded-xl w-full max-w-lg object-contain bg-white/10"
                 />
               </div>
