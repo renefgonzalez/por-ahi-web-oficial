@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, ShoppingBag, CheckCircle2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
@@ -6,6 +6,60 @@ import { formatPrice } from "../lib/utils";
 
 export default function AddToCartModal() {
   const { isAddModalOpen, setIsAddModalOpen, lastAddedItem, setIsCartOpen } = useCart();
+  const [progress, setProgress] = useState(100);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const startTimeRef = useRef<number>(Date.now());
+  const remainingTimeRef = useRef<number>(4000); // 4 seconds
+
+  const duration = 4000;
+
+  useEffect(() => {
+    if (isAddModalOpen && !isPaused) {
+      const step = 10; // ms
+      startTimeRef.current = Date.now();
+      
+      timerRef.current = setInterval(() => {
+        const elapsed = Date.now() - startTimeRef.current;
+        const newRemaining = remainingTimeRef.current - elapsed;
+        
+        if (newRemaining <= 0) {
+          clearInterval(timerRef.current!);
+          setIsAddModalOpen(false);
+          remainingTimeRef.current = duration;
+          setProgress(100);
+        } else {
+          setProgress((newRemaining / duration) * 100);
+        }
+      }, step);
+    }
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isAddModalOpen, isPaused, setIsAddModalOpen]);
+
+  // Reset logic when modal opens
+  useEffect(() => {
+    if (isAddModalOpen) {
+      setProgress(100);
+      remainingTimeRef.current = duration;
+      setIsPaused(false);
+    }
+  }, [isAddModalOpen, lastAddedItem]);
+
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      const elapsed = Date.now() - startTimeRef.current;
+      remainingTimeRef.current -= elapsed;
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+  };
 
   if (!lastAddedItem) return null;
 
@@ -28,7 +82,9 @@ export default function AddToCartModal() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl pointer-events-auto"
+              className="bg-white rounded-[32px] w-full max-w-sm overflow-hidden shadow-2xl pointer-events-auto relative"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
             >
               {/* Header */}
               <div className="bg-luxury-cyan p-6 flex items-center justify-between text-black">
@@ -86,6 +142,14 @@ export default function AddToCartModal() {
                     Seguir Comprando
                   </button>
                 </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/5">
+                <motion.div 
+                  className="h-full bg-luxury-cyan"
+                  style={{ width: `${progress}%` }}
+                />
               </div>
             </motion.div>
           </div>
