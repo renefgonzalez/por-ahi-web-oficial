@@ -13,3 +13,5 @@ body {
   color: #ffffff;
   font-family: var(--font-sans);
 }
+
+/* Re-deploy trigger: Supabase Secrets Synced */
