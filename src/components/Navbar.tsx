@@ -65,7 +65,7 @@ export default function Navbar() {
         <div className="flex-1 flex justify-end items-center gap-4 sm:gap-8 text-white">
           <div className="hidden lg:flex items-center gap-6 border-r border-white/10 pr-8 mr-2 transition-opacity">
             <a 
-              href="https://instagram.com/por.ahi.clothes" 
+              href="https://www.instagram.com/por_ahi_clothes?igsh=MXZveGd6bHdhNG8waw%3D%3D" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-luxury-cyan transition-colors"
@@ -74,7 +74,7 @@ export default function Navbar() {
               <Instagram className="w-4 h-4" />
             </a>
             <a 
-              href="https://facebook.com/por.ahi.clothes" 
+              href="https://www.facebook.com/share/1DzbUL7zHF/?mibextid=wwXIfr" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-luxury-cyan transition-colors"
@@ -84,6 +84,8 @@ export default function Navbar() {
             </a>
             <a 
               href="mailto:por.ahi.clothes@gmail.com" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-luxury-cyan transition-colors"
               title="Email"
             >

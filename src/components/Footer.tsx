@@ -45,7 +45,7 @@ export default function Footer() {
             <h5 className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/40">Redes Sociales</h5>
             <div className="flex gap-6">
               <a 
-                href="https://www.instagram.com/por_ahi_clothes?igsh=MXZveGd6bHdhNG8waw==" 
+                href="https://www.instagram.com/por_ahi_clothes?igsh=MXZveGd6bHdhNG8waw%3D%3D" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="p-3 bg-white/5 rounded-full hover:bg-luxury-cyan hover:text-black transition-all"
