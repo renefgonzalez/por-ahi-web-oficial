@@ -105,23 +105,36 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [deletedOrders]);
 
   const addToCart = (product: any, size: string) => {
+    // Console log para debugging como solicitó el usuario
+    console.log("Añadiendo al carrito:", product);
+
     setCart((prevCart) => {
+      // Nos aseguramos de que el ID sea numérico si viene de Supabase
+      const productId = Number(product.id);
       const existingItem = prevCart.find(
-        (item) => item.id === product.id && item.size === size
+        (item) => item.id === productId && item.size === size
       );
+
       if (existingItem) {
         return prevCart.map((item) =>
-          item.id === product.id && item.size === size
+          item.id === productId && item.size === size
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
+
+      // Limpiamos el precio: si es string "$450" -> 450, si es número se mantiene
+      const rawPrice = product.price;
+      const cleanPrice = typeof rawPrice === 'string' 
+        ? rawPrice.replace(/[^0-9.]/g, '') 
+        : rawPrice;
+
       return [
         ...prevCart,
         {
-          id: product.id,
-          name: product.name,
-          price: product.price,
+          id: productId,
+          name: product.name || "Producto sin nombre",
+          price: String(cleanPrice), // Guardamos como string para consistencia con la interfaz CartItem
           image: product.image || product.frenteImage || product.reversaImage || "",
           frenteImage: product.frenteImage,
           reversaImage: product.reversaImage,
@@ -211,7 +224,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   
   const subtotal = cart.reduce((sum, item) => {
-    const priceNum = parseFloat(item.price.replace("$", ""));
+    // Tratamos el precio con precaución
+    const priceStr = String(item.price || "0").replace(/[^0-9.]/g, "");
+    const priceNum = parseFloat(priceStr) || 0;
     return sum + priceNum * item.quantity;
   }, 0);
 

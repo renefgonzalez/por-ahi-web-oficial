@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import Cart from "./components/Cart";
 import { CartProvider } from "./context/CartContext";
 import { ProductProvider } from "./context/ProductContext";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 export default function App() {
   return (
@@ -17,7 +18,9 @@ export default function App() {
         <Router>
           <Toaster position="top-center" expand={false} richColors theme="dark" />
           <Navbar />
-          <Cart />
+          <ErrorBoundary>
+            <Cart />
+          </ErrorBoundary>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />

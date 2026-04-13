@@ -37,6 +37,7 @@ export default function ProductDetail() {
   const sizes = ["S", "M", "L", "XL"];
 
   const handleAddToCart = () => {
+    console.log("Producto seleccionado para el carrito:", product);
     if (product.hasSizes && !selectedSize) {
       alert("Por favor, selecciona una talla antes de añadir al carrito.");
       return;
