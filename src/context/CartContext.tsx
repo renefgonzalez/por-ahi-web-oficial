@@ -54,6 +54,11 @@ interface CartContextType {
   restoreOrder: (id: string) => void;
   deleteOrderPermanently: (id: string) => void;
   importOrders: (orders: Order[], deletedOrders: Order[]) => void;
+  increaseQuantity: (id: number, size: string) => void;
+  decreaseQuantity: (id: number, size: string) => void;
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (isOpen: boolean) => void;
+  lastAddedItem: CartItem | null;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -61,6 +66,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => {
     const saved = localStorage.getItem("porahi_orders");
     if (saved) {
@@ -129,24 +136,46 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ? rawPrice.replace(/[^0-9.]/g, '') 
         : rawPrice;
 
+      const newItem: CartItem = {
+        id: productId,
+        name: product.name || "Producto sin nombre",
+        price: String(cleanPrice),
+        image: product.image || product.frenteImage || product.reversaImage || "",
+        frenteImage: product.frenteImage,
+        reversaImage: product.reversaImage,
+        size: size,
+        quantity: 1,
+      };
+
+      setLastAddedItem(newItem);
+      setIsAddModalOpen(true);
+      
       return [
         ...prevCart,
-        {
-          id: productId,
-          name: product.name || "Producto sin nombre",
-          price: String(cleanPrice), // Guardamos como string para consistencia con la interfaz CartItem
-          image: product.image || product.frenteImage || product.reversaImage || "",
-          frenteImage: product.frenteImage,
-          reversaImage: product.reversaImage,
-          size: size,
-          quantity: 1,
-        },
+        newItem,
       ];
     });
-    setIsCartOpen(true);
-    toast.success("¡Añadido con éxito! ¿Buscas algo más?", {
-      duration: 3000,
-    });
+    // setIsCartOpen(true); // Don't open the whole cart yet, show the modal instead
+  };
+
+  const increaseQuantity = (id: number, size: string) => {
+    setCart((prev) => 
+      prev.map((item) => 
+        item.id === id && item.size === size 
+          ? { ...item, quantity: item.quantity + 1 } 
+          : item
+      )
+    );
+  };
+
+  const decreaseQuantity = (id: number, size: string) => {
+    setCart((prev) => 
+      prev.map((item) => 
+        item.id === id && item.size === size && item.quantity > 1 
+          ? { ...item, quantity: item.quantity - 1 } 
+          : item
+      )
+    );
   };
 
   const removeFromCart = (id: number, size: string) => {
@@ -250,6 +279,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
         restoreOrder,
         deleteOrderPermanently,
         importOrders,
+        increaseQuantity,
+        decreaseQuantity,
+        isAddModalOpen,
+        setIsAddModalOpen,
+        lastAddedItem,
       }}
     >
       {children}

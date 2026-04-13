@@ -7,6 +7,7 @@ import Info from "./pages/Info";
 import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
 import Cart from "./components/Cart";
+import AddToCartModal from "./components/AddToCartModal";
 import { CartProvider } from "./context/CartContext";
 import { ProductProvider } from "./context/ProductContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -21,6 +22,7 @@ export default function App() {
           <ErrorBoundary>
             <Cart />
           </ErrorBoundary>
+          <AddToCartModal />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />
