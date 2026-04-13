@@ -8,6 +8,7 @@ import Admin from "./pages/Admin";
 import Navbar from "./components/Navbar";
 import Cart from "./components/Cart";
 import AddToCartModal from "./components/AddToCartModal";
+import WhatsAppButton from "./components/WhatsAppButton";
 import { CartProvider } from "./context/CartContext";
 import { ProductProvider } from "./context/ProductContext";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -23,6 +24,7 @@ export default function App() {
             <Cart />
           </ErrorBoundary>
           <AddToCartModal />
+          <WhatsAppButton />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/catalog" element={<Catalog />} />

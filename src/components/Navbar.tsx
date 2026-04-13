@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ShoppingBag, Search, Menu, X, ChevronRight, Lock } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, ChevronRight, Lock, Instagram, Facebook, Mail } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { useCart } from "../context/CartContext";
@@ -62,13 +62,41 @@ export default function Navbar() {
           )}
         </div>
 
-        <div className="flex-1 flex justify-end items-center gap-8 text-white">
+        <div className="flex-1 flex justify-end items-center gap-4 sm:gap-8 text-white">
+          <div className="hidden lg:flex items-center gap-6 border-r border-white/10 pr-8 mr-2 transition-opacity">
+            <a 
+              href="https://instagram.com/por.ahi.clothes" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-luxury-cyan transition-colors"
+              title="Instagram"
+            >
+              <Instagram className="w-4 h-4" />
+            </a>
+            <a 
+              href="https://facebook.com/por.ahi.clothes" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-luxury-cyan transition-colors"
+              title="Facebook"
+            >
+              <Facebook className="w-4 h-4" />
+            </a>
+            <a 
+              href="mailto:por.ahi.clothes@gmail.com" 
+              className="hover:text-luxury-cyan transition-colors"
+              title="Email"
+            >
+              <Mail className="w-4 h-4" />
+            </a>
+          </div>
+
           <div className="relative flex items-center">
             <AnimatePresence>
               {isSearchOpen && (
                 <motion.div
                   initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: 200, opacity: 1 }}
+                  animate={{ width: 140, opacity: 1 }}
                   exit={{ width: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
