@@ -26,6 +26,8 @@ import { useCart } from "../context/CartContext";
 import { formatPrice } from "../lib/utils";
 import { useProducts, Product, SpecialLabel } from "../context/ProductContext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { toast } from "sonner";
 
 export default function Admin() {
   const { 
@@ -56,6 +58,8 @@ export default function Admin() {
   // Undo State
   const [lastDeleted, setLastDeleted] = useState<Product | null>(null);
   const [showUndo, setShowUndo] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -172,37 +176,71 @@ export default function Admin() {
     }
   };
 
-  const handleAddOrUpdateProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingId !== null) {
-      // Update existing
-      updateProduct(editingId, { 
-        ...newProduct, 
-        id: editingId,
-      } as Product);
-      setEditingId(null);
-    } else {
-      // Add new
-      addProduct({
-        ...newProduct,
-      } as Omit<Product, "id">);
-    }
+  const uploadImage = async (file: File) => {
+    try {
+      setIsUploading(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-    // Reset form
-    setNewProduct({
-      name: "",
-      description: "",
-      price: "",
-      category: "HOMBRE",
-      type: "Sudaderas",
-      theme: "Harry Potter",
-      imageType: "SÓLO FRENTE",
-      frenteImage: "",
-      reversaImage: "",
-      hasSizes: true,
-      specialLabel: "Ninguna"
-    });
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error: any) {
+      toast.error(`Error al subir imagen: ${error.message}`);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAddOrUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      if (editingId !== null) {
+        // Update existing
+        await updateProduct(editingId, newProduct);
+        toast.success("Producto actualizado correctamente");
+        setEditingId(null);
+      } else {
+        // Add new
+        const result = await addProduct(newProduct);
+        if (result) {
+          toast.success("Producto publicado correctamente");
+        } else {
+          throw new Error("No se pudo agregar el producto");
+        }
+      }
+
+      // Reset form
+      setNewProduct({
+        name: "",
+        description: "",
+        price: "",
+        category: "HOMBRE",
+        type: "Sudaderas",
+        theme: "Harry Potter",
+        imageType: "SÓLO FRENTE",
+        frenteImage: "",
+        reversaImage: "",
+        hasSizes: true,
+        specialLabel: "Ninguna"
+      });
+    } catch (error: any) {
+      toast.error(`Error: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEdit = (product: Product) => {
@@ -224,17 +262,20 @@ export default function Admin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id: number) => {
-    const productToDelete = inventory.find(p => p.id === id);
-    if (productToDelete) {
-      setLastDeleted(productToDelete);
-      deleteProduct(id);
-      setShowUndo(true);
-      
-      // Hide undo after 5 seconds
-      setTimeout(() => {
-        setShowUndo(false);
-      }, 5000);
+  const handleDelete = async (id: number) => {
+    if (confirm("¿Estás seguro de que quieres eliminar este producto?")) {
+      const productToDelete = inventory.find(p => p.id === id);
+      if (productToDelete) {
+        setLastDeleted(productToDelete);
+        await deleteProduct(id);
+        toast.success("Producto eliminado");
+        setShowUndo(true);
+        
+        // Hide undo after 5 seconds
+        setTimeout(() => {
+          setShowUndo(false);
+        }, 5000);
+      }
     }
   };
 
@@ -571,27 +612,62 @@ export default function Admin() {
 
                     <div className="relative">
                       <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                      <input
-                        type="url"
-                        placeholder={newProduct.imageType === "SÓLO REVERSA" ? "URL DE LA IMAGEN (FRENTE - OPCIONAL)" : "URL DE LA IMAGEN (FRENTE)"}
-                        value={newProduct.frenteImage}
-                        onChange={(e) => setNewProduct({...newProduct, frenteImage: e.target.value})}
-                        className={`w-full bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO REVERSA" ? "opacity-60" : ""}`}
-                        required={newProduct.imageType !== "SÓLO REVERSA"}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder={newProduct.imageType === "SÓLO REVERSA" ? "URL FRENTE (OPCIONAL)" : "URL FRENTE"}
+                          value={newProduct.frenteImage}
+                          onChange={(e) => setNewProduct({...newProduct, frenteImage: e.target.value})}
+                          className={`flex-grow bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO REVERSA" ? "opacity-60" : ""}`}
+                          required={newProduct.imageType !== "SÓLO REVERSA" && !newProduct.frenteImage}
+                        />
+                        <label className="cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center hover:bg-white/10 transition-colors">
+                          {isUploading ? <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" /> : <Upload className="w-4 h-4 text-white/40" />}
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const url = await uploadImage(file);
+                                if (url) setNewProduct({ ...newProduct, frenteImage: url });
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
 
                     <div className="relative">
                       <ImageIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-                      <input
-                        type="url"
-                        placeholder={newProduct.imageType === "SÓLO FRENTE" ? "URL IMAGEN REVERSA (DESACTIVADO)" : "URL IMAGEN REVERSA"}
-                        value={newProduct.reversaImage}
-                        onChange={(e) => setNewProduct({...newProduct, reversaImage: e.target.value})}
-                        disabled={newProduct.imageType === "SÓLO FRENTE"}
-                        className={`w-full bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}
-                        required={newProduct.imageType !== "SÓLO FRENTE"}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="url"
+                          placeholder={newProduct.imageType === "SÓLO FRENTE" ? "URL REVERSA (DESACTIVADO)" : "URL REVERSA"}
+                          value={newProduct.reversaImage}
+                          onChange={(e) => setNewProduct({...newProduct, reversaImage: e.target.value})}
+                          disabled={newProduct.imageType === "SÓLO FRENTE"}
+                          className={`flex-grow bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}
+                          required={newProduct.imageType !== "SÓLO FRENTE" && !newProduct.reversaImage}
+                        />
+                        <label className={`cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center hover:bg-white/10 transition-colors ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}>
+                          {isUploading ? <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" /> : <Upload className="w-4 h-4 text-white/40" />}
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept="image/*"
+                            disabled={newProduct.imageType === "SÓLO FRENTE"}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const url = await uploadImage(file);
+                                if (url) setNewProduct({ ...newProduct, reversaImage: url });
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
                     </div>
                   </div>
 
@@ -622,9 +698,10 @@ export default function Admin() {
                     )}
                     <button 
                       type="submit"
-                      className={`${editingId !== null ? "w-2/3" : "w-full"} py-6 bg-white text-black text-[10px] font-bold uppercase tracking-[0.4em] rounded-2xl hover:bg-luxury-cyan transition-all duration-500 flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(0,229,255,0.1)]`}
+                      disabled={isSubmitting || isUploading}
+                      className={`${editingId !== null ? "w-2/3" : "w-full"} py-6 bg-white text-black text-[10px] font-bold uppercase tracking-[0.4em] rounded-2xl hover:bg-luxury-cyan disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-500 flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(0,229,255,0.1)]`}
                     >
-                      {editingId !== null ? <CheckCircle2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      {isSubmitting ? <RotateCcw className="w-5 h-5 animate-spin" /> : editingId !== null ? <CheckCircle2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                       {editingId !== null ? "Guardar Cambios" : "Publicar Producto"}
                     </button>
                   </div>

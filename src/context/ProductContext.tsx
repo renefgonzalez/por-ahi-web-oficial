@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { PRODUCTS as INITIAL_PRODUCTS } from "../constants";
+import { supabase } from "../lib/supabase";
 
 export type SpecialLabel = "Ninguna" | "Nuevo Lanzamiento" | "Rebajas" | "Destacado";
 
@@ -8,106 +8,142 @@ export interface Product {
   name: string;
   description: string;
   price: string;
-  category: string; // HOMBRE, MUJER, etc.
-  type: string; // Sudadera, Playera, etc.
-  theme: string; // Harry Potter, Marvel, etc.
-  imageType: string; // SÓLO FRENTE, SÓLO REVERSA, FRENTE Y REVERSA
+  category: string; 
+  type: string; 
+  theme: string; 
+  imageType: string; 
   frenteImage: string;
   reversaImage?: string;
   hasSizes: boolean;
   specialLabel?: SpecialLabel;
+  created_at?: string;
 }
 
 interface ProductContextType {
   products: Product[];
-  addProduct: (product: Omit<Product, "id">) => void;
-  updateProduct: (id: number, product: Product) => void;
-  deleteProduct: (id: number) => void;
-  restoreProduct: (product: Product) => void;
-  importProducts: (products: Product[]) => void;
+  isLoading: boolean;
+  addProduct: (product: Omit<Product, "id">) => Promise<Product | null>;
+  updateProduct: (id: number, product: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: number) => Promise<void>;
+  restoreProduct: (product: Product) => Promise<void>;
+  importProducts: (products: Product[]) => Promise<void>;
   themes: string[];
   categories: string[];
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  refreshProducts: () => Promise<void>;
 }
 
 const ProductContext = createContext<ProductContextType | undefined>(undefined);
 
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(() => {
-    const APP_VERSION = "2.0"; // Increment version to trigger cleanup
-    const savedVersion = localStorage.getItem("porahi_app_version");
-
-    if (savedVersion !== APP_VERSION) {
-      // One-time cleanup for the new update
-      localStorage.removeItem("porahi_inventory");
-      localStorage.removeItem("porahi_orders");
-      localStorage.removeItem("porahi_deleted_orders");
-      localStorage.setItem("porahi_app_version", APP_VERSION);
-      return INITIAL_PRODUCTS;
-    }
-
-    const saved = localStorage.getItem("porahi_inventory");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Migrate old products to new property names
-      return parsed.map((p: any) => ({
-        ...p,
-        imageType: p.imageType || (p.designLocation === "Solo Reversa" ? "SÓLO REVERSA" : p.designLocation === "Solo Frente" ? "SÓLO FRENTE" : p.designLocation === "Frente y Reversa" ? "FRENTE Y REVERSA" : "SÓLO FRENTE"),
-        frenteImage: p.frenteImage || p.image || "",
-        reversaImage: p.reversaImage || p.backImage || "",
-        hasSizes: p.hasSizes !== undefined ? p.hasSizes : true,
-        specialLabel: p.specialLabel || "Ninguna"
-      }));
-    }
-    // Default initial products
-    return INITIAL_PRODUCTS.map(p => ({ 
-      ...p, 
-      hasSizes: true,
-      specialLabel: "Ninguna" as SpecialLabel
-    }));
-  });
-
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const fetchProducts = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("porahi_inventory", JSON.stringify(products));
-  }, [products]);
+    fetchProducts();
 
-  const addProduct = (productData: Omit<Product, "id">) => {
-    const newProduct = {
-      ...productData,
-      id: Math.max(...products.map((p) => p.id), 0) + 1,
+    // Set up real-time subscription
+    const subscription = supabase
+      .channel('products_changes')
+      .on('postgres_changes', { event: '*', table: 'products' }, () => {
+        fetchProducts();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
     };
-    setProducts((prev) => [...prev, newProduct]);
+  }, []);
+
+  const addProduct = async (productData: Omit<Product, "id">) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .insert([productData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error adding product:', error);
+      return null;
+    }
   };
 
-  const updateProduct = (id: number, productData: Product) => {
-    setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...productData, id } : p))
-    );
+  const updateProduct = async (id: number, productData: Partial<Product>) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
   };
 
-  const deleteProduct = (id: number) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+  const deleteProduct = async (id: number) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error deleting product:', error);
+    }
   };
 
-  const restoreProduct = (product: Product) => {
-    setProducts((prev) => [...prev, product]);
+  const restoreProduct = async (product: Product) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, created_at, ...dataToInsert } = product as any;
+    await addProduct(dataToInsert);
   };
 
-  const importProducts = (newProducts: Product[]) => {
-    setProducts(newProducts);
+  const importProducts = async (newProducts: Product[]) => {
+    try {
+      // Basic implementation for bulk import
+      const { error } = await supabase
+        .from('products')
+        .insert(newProducts.map(({ id, ...rest }) => rest)); // strip existing IDs
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error importing products:', error);
+    }
   };
 
   // Derived data
-  const themes = Array.from(new Set(products.map((p) => p.theme.trim().toUpperCase()))).sort();
-  const categories = Array.from(new Set(products.map((p) => p.category.trim().toUpperCase()))).sort();
+  const themes = Array.from(new Set(products.map((p) => p.theme?.trim().toUpperCase() || ''))).filter(Boolean).sort();
+  const categories = Array.from(new Set(products.map((p) => p.category?.trim().toUpperCase() || ''))).filter(Boolean).sort();
 
   return (
     <ProductContext.Provider
       value={{
         products,
+        isLoading,
         addProduct,
         updateProduct,
         deleteProduct,
@@ -117,6 +153,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         categories,
         searchQuery,
         setSearchQuery,
+        refreshProducts: fetchProducts,
       }}
     >
       {children}

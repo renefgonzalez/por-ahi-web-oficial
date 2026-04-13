@@ -7,7 +7,7 @@ import { formatPrice } from "../lib/utils";
 import Footer from "../components/Footer";
 
 export default function Catalog() {
-  const { products: inventory, themes, categories: productCategories, searchQuery, setSearchQuery } = useProducts();
+  const { products: inventory, themes, categories: productCategories, searchQuery, setSearchQuery, isLoading } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const initialCategory = searchParams.get("category") || "ALL";
@@ -164,56 +164,64 @@ export default function Catalog() {
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
-          <AnimatePresence mode="popLayout">
-            {sortedProducts.map((product) => (
-              <motion.div
-                key={product.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                className="bg-white rounded-[20px] overflow-hidden group flex flex-col cursor-pointer"
-                onClick={() => navigate(`/product/${product.id}`)}
-              >
-                <div className="aspect-square relative overflow-hidden bg-gray-100">
-                  {product.specialLabel && product.specialLabel !== "Ninguna" && (
-                    <div className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest shadow-lg ${
-                      product.specialLabel === "Rebajas" ? "bg-red-500 text-white" : "bg-luxury-cyan text-black"
-                    }`}>
-                      {product.specialLabel}
-                    </div>
-                  )}
-                  <img
-                    src={product.imageType === "SÓLO REVERSA" && !product.frenteImage ? product.reversaImage : product.frenteImage}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  {product.imageType === "SÓLO REVERSA" && (
-                    <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-10 px-2 py-0.5 md:px-3 md:py-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-full text-[6px] md:text-[8px] font-bold uppercase tracking-widest text-white/80">
-                      Diseño en espalda
-                    </div>
-                  )}
-                </div>
-                <div className="p-3 md:p-6 text-black flex flex-col flex-grow">
-                  <div className="mb-3 md:mb-4">
-                    <h4 className="text-[9px] md:text-xs font-bold uppercase tracking-wider mb-1 line-clamp-1">{product.name}</h4>
-                    <p className="text-[8px] md:text-[10px] text-black/40 uppercase tracking-widest">{product.theme}</p>
-                  </div>
-                  <div className="mt-auto flex flex-col gap-3 md:gap-4">
-                    <p className="text-sm md:text-lg font-light">{formatPrice(product.price)}</p>
-                    <button className="w-full py-2 md:py-3 bg-black text-white rounded-xl text-[8px] md:text-[10px] uppercase tracking-widest font-bold hover:bg-luxury-cyan hover:text-black transition-all duration-300">
-                      VER DETALLE
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
+        {/* PRODUCT GRID or LOADING */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="aspect-[3/4] bg-white/5 animate-pulse rounded-[20px]" />
             ))}
-          </AnimatePresence>
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            <AnimatePresence mode="popLayout">
+              {sortedProducts.map((product) => (
+                <motion.div
+                  key={product.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.4 }}
+                  className="bg-white rounded-[20px] overflow-hidden group flex flex-col cursor-pointer"
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
+                  <div className="aspect-square relative overflow-hidden bg-gray-100">
+                    {product.specialLabel && product.specialLabel !== "Ninguna" && (
+                      <div className={`absolute top-2 left-2 md:top-4 md:left-4 z-10 px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[7px] md:text-[8px] font-black uppercase tracking-widest shadow-lg ${
+                        product.specialLabel === "Rebajas" ? "bg-red-500 text-white" : "bg-luxury-cyan text-black"
+                      }`}>
+                        {product.specialLabel}
+                      </div>
+                    )}
+                    <img
+                      src={product.imageType === "SÓLO REVERSA" && !product.frenteImage ? product.reversaImage : product.frenteImage}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    {product.imageType === "SÓLO REVERSA" && (
+                      <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 z-10 px-2 py-0.5 md:px-3 md:py-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-full text-[6px] md:text-[8px] font-bold uppercase tracking-widest text-white/80">
+                        Diseño en espalda
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 md:p-6 text-black flex flex-col flex-grow">
+                    <div className="mb-3 md:mb-4">
+                      <h4 className="text-[9px] md:text-xs font-bold uppercase tracking-wider mb-1 line-clamp-1">{product.name}</h4>
+                      <p className="text-[8px] md:text-[10px] text-black/40 uppercase tracking-widest">{product.theme}</p>
+                    </div>
+                    <div className="mt-auto flex flex-col gap-3 md:gap-4">
+                      <p className="text-sm md:text-lg font-light">{formatPrice(product.price)}</p>
+                      <button className="w-full py-2 md:py-3 bg-black text-white rounded-xl text-[8px] md:text-[10px] uppercase tracking-widest font-bold hover:bg-luxury-cyan hover:text-black transition-all duration-300">
+                        VER DETALLE
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-24 max-w-md mx-auto">
