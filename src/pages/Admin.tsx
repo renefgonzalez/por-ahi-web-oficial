@@ -179,8 +179,15 @@ export default function Admin() {
   const uploadImage = async (file: File) => {
     try {
       setIsUploading(true);
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      
+      // Sanitizacion del nombre: quitar espacios, acentos y ñ
+      const cleanName = file.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
+        .replace(/\s+/g, "_") // Espacios por guiones bajos
+        .replace(/[^a-zA-Z0-9.-]/g, ""); // Quitar otros caracteres raros
+      
+      const fileName = `${Date.now()}_${cleanName}`;
       const filePath = `${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -621,8 +628,15 @@ export default function Admin() {
                           className={`flex-grow bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO REVERSA" ? "opacity-60" : ""}`}
                           required={newProduct.imageType !== "SÓLO REVERSA" && !newProduct.frenteImage}
                         />
-                        <label className="cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center hover:bg-white/10 transition-colors">
-                          {isUploading ? <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" /> : <Upload className="w-4 h-4 text-white/40" />}
+                        <label className="cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center gap-2 hover:bg-white/10 transition-colors group">
+                          {isUploading ? (
+                            <>
+                              <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" />
+                              <span className="text-[7px] font-bold text-luxury-cyan animate-pulse">SUBIENDO...</span>
+                            </>
+                          ) : (
+                            <Upload className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                          )}
                           <input 
                             type="file" 
                             className="hidden" 
@@ -651,8 +665,15 @@ export default function Admin() {
                           className={`flex-grow bg-black border border-white/10 rounded-xl py-4 pl-12 pr-4 text-[10px] uppercase tracking-widest focus:outline-none focus:border-luxury-cyan transition-colors ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}
                           required={newProduct.imageType !== "SÓLO FRENTE" && !newProduct.reversaImage}
                         />
-                        <label className={`cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center hover:bg-white/10 transition-colors ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}>
-                          {isUploading ? <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" /> : <Upload className="w-4 h-4 text-white/40" />}
+                        <label className={`cursor-pointer bg-white/5 border border-white/10 rounded-xl px-4 flex items-center gap-2 hover:bg-white/10 transition-colors group ${newProduct.imageType === "SÓLO FRENTE" ? "opacity-30 cursor-not-allowed" : ""}`}>
+                          {isUploading ? (
+                            <>
+                              <RotateCcw className="w-4 h-4 animate-spin text-luxury-cyan" />
+                              <span className="text-[7px] font-bold text-luxury-cyan animate-pulse">SUBIENDO...</span>
+                            </>
+                          ) : (
+                            <Upload className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+                          )}
                           <input 
                             type="file" 
                             className="hidden" 
