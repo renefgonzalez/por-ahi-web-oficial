@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { ShoppingBag, Search, Menu, ChevronDown, Lock, ChevronLeft, X } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useProducts } from "../context/ProductContext";
-import { formatPrice } from "../lib/utils";
+import { formatPrice, normalizeString } from "../lib/utils";
 import Footer from "../components/Footer";
 
 export default function Catalog() {
@@ -37,16 +37,22 @@ export default function Catalog() {
   }, [searchParams]);
 
   const filteredProducts = inventory.filter((product) => {
-    const searchLower = searchQuery.toLowerCase().trim();
-    const nameMatch = product.name.toLowerCase().includes(searchLower);
-    const categoryMatchSearch = product.category.toLowerCase().includes(searchLower);
-    const descriptionMatch = product.description.toLowerCase().includes(searchLower);
-    const themeMatchSearch = product.theme.toLowerCase().includes(searchLower);
+    const searchNorm = normalizeString(searchQuery);
     
-    const matchesSearch = !searchQuery || nameMatch || categoryMatchSearch || descriptionMatch || themeMatchSearch;
+    const nameNorm = normalizeString(product.name);
+    const categoryNorm = normalizeString(product.category);
+    const descriptionNorm = normalizeString(product.description || "");
+    const themeNorm = normalizeString(product.theme || "");
+
+    const matchesSearch = !searchQuery || 
+      nameNorm.includes(searchNorm) || 
+      categoryNorm.includes(searchNorm) || 
+      descriptionNorm.includes(searchNorm) || 
+      themeNorm.includes(searchNorm);
 
     const categoryMatch = selectedCategory === "ALL" 
       || (selectedCategory === "REBAJAS_FILTER" ? product.specialLabel === "Rebajas" : product.category.toUpperCase().trim() === selectedCategory.toUpperCase().trim());
+    
     const themeMatch = selectedTheme === "ALL" || product.theme.toUpperCase().trim() === selectedTheme.toUpperCase().trim();
     
     return matchesSearch && categoryMatch && themeMatch;
@@ -79,6 +85,43 @@ export default function Catalog() {
             <ChevronLeft className="w-6 h-6 group-hover:-translate-x-2 transition-transform" />
             Volver al Inicio
           </Link>
+        </div>
+
+        {/* HORIZONTAL CATEGORIES (MOBILE STYLE) */}
+        <div className="mb-12 overflow-x-auto no-scrollbar flex items-center gap-3 pb-2 -mx-2 px-2 mask-linear-right sm:mask-none">
+          <button
+            onClick={() => { setSelectedCategory("ALL"); setSearchParams({}); }}
+            className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
+              selectedCategory === "ALL"
+                ? "bg-white text-black border-white shadow-[0_5px_15px_rgba(255,255,255,0.2)]"
+                : "bg-transparent text-white/40 border-white/10 hover:border-white/40 hover:text-white"
+            }`}
+          >
+            TODAS
+          </button>
+          {productCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setSelectedCategory(cat); setSearchParams({ category: cat }); }}
+              className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
+                selectedCategory.toUpperCase() === cat.toUpperCase()
+                  ? "bg-white text-black border-white shadow-[0_5px_15px_rgba(255,255,255,0.2)]"
+                  : "bg-transparent text-white/40 border-white/10 hover:border-white/40 hover:text-white"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+          <button
+            onClick={() => { setSelectedCategory("REBAJAS_FILTER"); setSearchParams({ category: "Rebajas" }); }}
+            className={`flex-shrink-0 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-300 border ${
+              selectedCategory === "REBAJAS_FILTER"
+                ? "bg-red-500 text-white border-red-500 shadow-[0_5px_15px_rgba(239,68,68,0.3)]"
+                : "bg-transparent text-red-500/40 border-red-500/10 hover:border-red-500/60 hover:text-red-500"
+            }`}
+          >
+            REBAJAS %
+          </button>
         </div>
 
         {/* DYNAMIC TITLE */}
