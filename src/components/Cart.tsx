@@ -92,7 +92,7 @@ ${formData.notes ? `📝 Notas: ${formData.notes}\n` : ""}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeCart}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100]"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[300]"
           />
 
           <motion.div
@@ -100,7 +100,7 @@ ${formData.notes ? `📝 Notas: ${formData.notes}\n` : ""}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-full max-w-[450px] bg-black text-white z-[101] shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-full w-full max-w-[450px] bg-black text-white z-[301] shadow-2xl flex flex-col"
           >
             {/* HEADER */}
             <div className="p-8 border-b border-white/5 flex justify-between items-center bg-black">

@@ -116,9 +116,9 @@ export default function Navbar() {
               onClick={() => setIsSearchOpen(!isSearchOpen)}
             />
           </div>
-          <div 
+          <button 
             onClick={() => setIsCartOpen(true)}
-            className="relative cursor-pointer group"
+            className="relative cursor-pointer group p-2 -m-2"
           >
             <ShoppingBag className="w-5 h-5 group-hover:text-luxury-cyan transition-colors" />
             {totalItems > 0 && (
@@ -126,7 +126,7 @@ export default function Navbar() {
                 {totalItems}
               </span>
             )}
-          </div>
+          </button>
           <Menu 
             className="md:hidden w-6 h-6 cursor-pointer hover:text-luxury-cyan transition-colors" 
             onClick={() => setIsMenuOpen(true)}

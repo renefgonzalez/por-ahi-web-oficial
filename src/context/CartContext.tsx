@@ -66,6 +66,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  
+  const toggleCart = (isOpen: boolean) => {
+    console.log("Cambiando estado del carrito a:", isOpen);
+    setIsCartOpen(isOpen);
+  };
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
   const [orders, setOrders] = useState<Order[]>(() => {
@@ -266,7 +272,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addToCart,
         removeFromCart,
         isCartOpen,
-        setIsCartOpen,
+        setIsCartOpen: toggleCart,
         clearCart,
         totalItems,
         subtotal,
