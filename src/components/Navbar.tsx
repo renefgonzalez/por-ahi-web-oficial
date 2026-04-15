@@ -116,7 +116,6 @@ export default function Navbar() {
               className={`w-5 h-5 cursor-pointer hover:text-luxury-cyan transition-colors ${isSearchOpen ? 'text-luxury-cyan' : ''}`} 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
             />
-          </div>
           <button 
             onClick={() => setIsCartOpen(true)}
             className="relative cursor-pointer group p-2 -m-2"
