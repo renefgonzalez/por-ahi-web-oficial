@@ -38,7 +38,7 @@ export default function Navbar() {
           
           <div className="hidden lg:flex items-center gap-4 border-l border-white/10 pl-6 transition-opacity">
             <a 
-              href="https://www.instagram.com/porahi.site/" 
+              href="https://www.instagram.com/porahi.store/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-white/40 hover:text-luxury-cyan transition-colors"
