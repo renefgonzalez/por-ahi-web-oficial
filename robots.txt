@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://porahi.site/sitemap.xml
+Sitemap: https://porahi.store/sitemap.xml
