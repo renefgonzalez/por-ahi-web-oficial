@@ -10,9 +10,9 @@ export default function AddToCartModal() {
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const startTimeRef = useRef<number>(Date.now());
-  const remainingTimeRef = useRef<number>(4000); // 4 seconds
+  const remainingTimeRef = useRef<number>(3000); // 3 seconds
 
-  const duration = 4000;
+  const duration = 3000;
 
   useEffect(() => {
     if (isAddModalOpen && !isPaused) {

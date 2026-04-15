@@ -48,7 +48,7 @@ export default function WhatsAppButton() {
             className="bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-2xl mr-2"
           >
             <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.2em] text-luxury-cyan">
-              ¿Dudas? Pregúntanos
+              ¿Dudas sobre un diseño?
             </p>
           </motion.div>
 

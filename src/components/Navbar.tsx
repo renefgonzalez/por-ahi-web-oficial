@@ -30,11 +30,41 @@ export default function Navbar() {
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 bg-black border-b border-white/5">
-        <div className="flex-1">
+        <div className="flex-1 flex items-center gap-8">
           <Link to="/" className="flex flex-col items-start leading-[0.75] group font-logo">
             <span className="text-2xl font-black text-white group-hover:text-luxury-cyan transition-colors">POR</span>
             <span className="text-2xl font-black text-white group-hover:text-luxury-cyan transition-colors">AHÍ...</span>
           </Link>
+          
+          <div className="hidden lg:flex items-center gap-4 border-l border-white/10 pl-6 transition-opacity">
+            <a 
+              href="https://www.instagram.com/porahi.site/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white/40 hover:text-luxury-cyan transition-colors"
+              title="Instagram"
+            >
+              <Instagram className="w-4 h-4" />
+            </a>
+            <a 
+              href="https://www.facebook.com/share/1DzbUL7zHF/?mibextid=wwXIfr" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-white/40 hover:text-luxury-cyan transition-colors"
+              title="Facebook"
+            >
+              <Facebook className="w-4 h-4" />
+            </a>
+            <a 
+              href="mailto:por.ahi.clothes@gmail.com" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/40 hover:text-luxury-cyan transition-colors"
+              title="Email"
+            >
+              <Mail className="w-4 h-4" />
+            </a>
+          </div>
         </div>
 
         <div className="hidden md:flex flex-1 justify-center items-center gap-12 text-[10px] uppercase tracking-[0.4em] font-semibold text-white/70">
@@ -63,37 +93,6 @@ export default function Navbar() {
         </div>
 
         <div className="flex-1 flex justify-end items-center gap-4 sm:gap-8 text-white">
-          <div className="hidden lg:flex items-center gap-6 border-r border-white/10 pr-8 mr-2 transition-opacity">
-            <a 
-              href="https://www.instagram.com/por_ahi_clothes?igsh=MXZveGd6bHdhNG8waw%3D%3D" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-luxury-cyan transition-colors"
-              title="Instagram"
-            >
-              <Instagram className="w-4 h-4" />
-            </a>
-            <a 
-              href="https://www.facebook.com/share/1DzbUL7zHF/?mibextid=wwXIfr" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-luxury-cyan transition-colors"
-              title="Facebook"
-            >
-              <Facebook className="w-4 h-4" />
-            </a>
-            <a 
-              href="mailto:por.ahi.clothes@gmail.com" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-luxury-cyan transition-colors"
-              title="Email"
-            >
-              <Mail className="w-4 h-4" />
-            </a>
-          </div>
-
-          <div className="relative flex items-center">
             <AnimatePresence>
               {isSearchOpen && (
                 <motion.div
