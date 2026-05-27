@@ -40,7 +40,7 @@ export default function Catalog() {
     const searchNorm = normalizeString(searchQuery);
     
     const nameNorm = normalizeString(product.name);
-    const categoryNorm = normalizeString(product.category);
+    const categoryNorm = normalizeString(product.type || product.category);
     const descriptionNorm = normalizeString(product.description || "");
     const themeNorm = normalizeString(product.theme || "");
 
@@ -51,7 +51,7 @@ export default function Catalog() {
       themeNorm.includes(searchNorm);
 
     const categoryMatch = selectedCategory === "ALL" 
-      || (selectedCategory === "REBAJAS_FILTER" ? product.specialLabel === "Rebajas" : product.category.toUpperCase().trim() === selectedCategory.toUpperCase().trim());
+      || (selectedCategory === "REBAJAS_FILTER" ? product.specialLabel === "Rebajas" : ((product.type?.toUpperCase().trim() === selectedCategory.toUpperCase().trim()) || (product.category?.toUpperCase().trim() === selectedCategory.toUpperCase().trim())));
     
     const themeMatch = selectedTheme === "ALL" || product.theme.toUpperCase().trim() === selectedTheme.toUpperCase().trim();
     

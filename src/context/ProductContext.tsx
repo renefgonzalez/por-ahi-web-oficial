@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
+import { PRODUCTS } from "../constants";
 
 export type SpecialLabel = "Ninguna" | "Nuevo Lanzamiento" | "Rebajas" | "Destacado";
 
@@ -50,9 +51,15 @@ export function ProductProvider({ children }: { children: ReactNode }) {
         .order('id', { ascending: false });
 
       if (error) throw error;
-      setProducts(data || []);
+      
+      if (!data || data.length === 0) {
+        setProducts(PRODUCTS as unknown as Product[]);
+      } else {
+        setProducts(data);
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
+      setProducts(PRODUCTS as unknown as Product[]);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +71,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     // Set up real-time subscription
     const subscription = supabase
       .channel('products_changes')
-      .on('postgres_changes', { event: '*', table: 'products' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
         fetchProducts();
       })
       .subscribe();
@@ -137,7 +144,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
 
   // Derived data
   const themes = Array.from(new Set(products.map((p) => p.theme?.trim().toUpperCase() || ''))).filter(Boolean).sort();
-  const categories = Array.from(new Set(products.map((p) => p.category?.trim().toUpperCase() || ''))).filter(Boolean).sort();
+  const categories = Array.from(new Set(products.map((p) => p.type?.trim().toUpperCase() || p.category?.trim().toUpperCase() || ''))).filter(Boolean).sort();
 
   return (
     <ProductContext.Provider
